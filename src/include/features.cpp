@@ -1,26 +1,14 @@
 /* File written by Jonah Ezekiel (jezekiel@stanford.edu), with many segments copied
-from parts of the spinnaker SDK examples. Program includes functions that allow users
-to modify features of blackfly model s cameras over software using the Spinnaker SDK
-API. File is intended to be used as a dependency for programs a directory up.
+from parts of the spinnaker SDK examples. Program includes helper functionss for reading
+and modifying features and generally interacting with blackfly model s cameras over software
+using the Spinnaker SDK API. File is intended to be used as a dependency for programs a 
+directory higher.
+
+NOTE: functions setADCBitDepth, setShutterMode, setPixelFormat, setExposureTime, and setAcquisitionMode
+are unecessary and were written before the generic functions set, and setBool were written. Any variable,
+including those modified by these unecessary functions, can be accessed and mofied using set and setBool.
         
 See function comments for more details. */
-
-//=============================================================================
-// Copyright (c) 2001-2019 FLIR Systems, Inc. All Rights Reserved.
-//
-// This software is the confidential and proprietary information of FLIR
-// Integrated Imaging Solutions, Inc. ("Confidential Information"). You
-// shall not disclose such Confidential Information and shall use it only in
-// accordance with the terms of the license agreement you entered into
-// with FLIR Integrated Imaging Solutions, Inc. (FLIR).
-//
-// FLIR MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
-// SOFTWARE, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-// PURPOSE, OR NON-INFRINGEMENT. FLIR SHALL NOT BE LIABLE FOR ANY DAMAGES
-// SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
-// THIS SOFTWARE OR ITS DERIVATIVES.
-//=============================================================================
 
 #include "Spinnaker.h"
 #include "SpinGenApi/SpinnakerGenApi.h"
@@ -35,11 +23,11 @@ using namespace Spinnaker::GenApi;
 using namespace Spinnaker::GenICam;
 using namespace std;
 
-/* Generic function that allows for the modification of any camera feature variable.
- * Takes as input string representing attribute, camera poitner, nodemap, nodemaptldevice,
- * and string representing value to set attribute to. Correct formatting and names for
- * both attribute and attribute values related to the camera can be found on the camera's
- * technical reference webpage, linked in the project Readme */
+/* Generic function that allows for the modification of any camera feature variable that has possible
+values which are strings. Takes as input string representing attribute, camera poitner, nodemap, 
+nodemaptldevice, and string representing value to set attribute to. Correct formatting and names for
+both attribute and attribute values related to the camera can be found on the camera's technical 
+reference webpage, linked in the project Readme.*/
 int set(gcstring attribute, CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, gcstring value) {
     CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode(attribute);
     if (!IsAvailable(ptrAcquisitionMode)) {
@@ -62,6 +50,9 @@ int set(gcstring attribute, CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMap
     }   
 }
 
+/* Equivalent function to set function, but allows for camera attribute values that are booleans. Whether
+the attribute values are strings or booleans depends on what the attribute is and can be found in the
+technical reference linked in the project README file. */
 int setBool(gcstring attribute, CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, bool value) {
     CBooleanPtr ptrAcquisitionMode = nodeMap.GetNode(attribute);
     if (!IsAvailable(ptrAcquisitionMode)) {
@@ -79,8 +70,7 @@ int setBool(gcstring attribute, CameraPtr pCam, INodeMap& nodeMap, INodeMap& nod
 }
 
 
-/* Function called by run camera function and prints out info about a camera. Takes
-as input nodeMap for the camera */
+/* Prints out info about a camera. Takes as input nodeMap for the camera */
 int PrintDeviceInfo(INodeMap& nodeMap) {
     cout << endl << "*** DEVICE INFORMATION ***" << endl << endl;
     FeatureList_t features;
@@ -102,9 +92,8 @@ int PrintDeviceInfo(INodeMap& nodeMap) {
     }
 }
 
-/* Called by run camera function. Modifies ADC bit depth for passed in camera. Takes
- * as input pointer to camera, camras nodeMAP, cameras nodeMapTLDevice, and the adc bit
- * depth, which is either ten, twelve, or fourteen */
+/* Modifies ADC bit depth for passed in camera. Takes as input pointer to camera, camras nodeMAP, cameras
+nodeMapTLDevice, and the adc bit depth, which is either 10, 12, or 14 */
 int setADCBitDepth(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, int bitDepth) {
     CEnumerationPtr ptrBitDepth = nodeMap.GetNode("AdcBitDepth");
     if (!IsAvailable(ptrBitDepth) || !IsWritable(ptrBitDepth)) {
@@ -133,9 +122,8 @@ int setADCBitDepth(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice,
     }
 }
 
-/* Called by run camera function. Takes as input camera, cameras nodeMap, cameras
- * nodeMapZTLDevice, and an integer representing choice of shutter mode, where zero
- * corresponds to rolling shutter, and 1 to global reset */
+/*Takes as input camera, cameras nodeMap, cameras nodeMapZTLDevice, and an integer representing
+choice of shutter mode, where zero corresponds to rolling shutter, and 1 to global reset */
 int setShutterMode(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, int mode) {
     CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("SensorShutterMode");
     if (!IsAvailable(ptrAcquisitionMode)) {
@@ -169,9 +157,8 @@ int setShutterMode(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice,
     }
 }
 
-/* Called by run camera function. Takes as input camera, cameras nodeMap, cameras
- * nodeMapZTLDevice, and an integer representing choice of pixel format, where 8
- * corresponds to mono8, and 16 to mono16 */
+/* Takes as input camera, cameras nodeMap, cameras nodeMapTLDevice, and an integer representing
+choice of pixel format, where 8 corresponds to mono8, and 16 to mono16 */
 int setPixelFormat(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, int mode) {
     CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("PixelFormat");
     if (!IsAvailable(ptrAcquisitionMode)) {
@@ -206,9 +193,8 @@ int setPixelFormat(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice,
 }
 
 
-/* Called by run camera function. Modifies exposure time for a camera. Takes as input
-pointer to the camera, the cameras nodeMap,the cameras nodeMapTLDevice, and the
-exposureTime in microseconds */
+/* Modifies exposure time for a camera. Takes as input pointer to the camera, the cameras nodeMap,
+the cameras nodeMapTLDevice, and the exposureTime in microseconds */
 int setExposureTime(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, int exposureTime) {
     CEnumerationPtr ptrExposureAuto = nodeMap.GetNode("ExposureAuto");
     if (!IsAvailable(ptrExposureAuto) || !IsWritable(ptrExposureAuto)) {
@@ -248,8 +234,8 @@ int setExposureTime(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice
     return 0;
 }
 
-/* Called by run camera function. Takes as input camera, cameras nodeMap, and cameras
-nodeMapTLDevice and sets the acquisition mode to Single Frame */
+/* Takes as input camera, cameras nodeMap, and cameras nodeMapTLDevice and sets the acquisition
+mode to Single Frame */
 int setAcquisitionMode(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice) {
     CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
     if (!IsAvailable(ptrAcquisitionMode)) {
@@ -271,4 +257,3 @@ int setAcquisitionMode(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDev
         return 0;
     }
 }
-

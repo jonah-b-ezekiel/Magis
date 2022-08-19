@@ -1,27 +1,17 @@
-/* File written by Jonah Ezekiel (jezekiel@stanford.edu), with many segments copied
-from parts of the spinnaker SDK examples. Program allows user to write scripts to modify features of spinnaker SDK blackfly model s cameras and acquire images over software.
+/*Please see acquisitionFunc.cpp program before looking at this file as the functionality 
+is similar, but better explained in that file. Program allows user to write scripts to modify
+features of spinnaker SDK blackfly model s cameras and acquire images over software for purposes
+of acquiring data for camera characterization purposes. Note: Program requires a config file to
+be passed in via command line. See "config_files" directory for an example. 
         
+NOTE: we've had problems with the camera crashing after taking too many images that are still
+unsolved. For this purpose, when running this script, we've commonly had to acquire the data we
+need in small chunks, resetting and rerunning the script regularely.
+
 See function comments for more details. */
 
-//=============================================================================
-// Copyright (c) 2001-2019 FLIR Systems, Inc. All Rights Reserved.
-//
-// This software is the confidential and proprietary information of FLIR
-// Integrated Imaging Solutions, Inc. ("Confidential Information"). You
-// shall not disclose such Confidential Information and shall use it only in
-// accordance with the terms of the license agreement you entered into
-// with FLIR Integrated Imaging Solutions, Inc. (FLIR).
-//
-// FLIR MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
-// SOFTWARE, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-// PURPOSE, OR NON-INFRINGEMENT. FLIR SHALL NOT BE LIABLE FOR ANY DAMAGES
-// SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
-// THIS SOFTWARE OR ITS DERIVATIVES.
-//=============================================================================
-
-//#include "Spinnaker.h"
-//#include "SpinGenApi/SpinnakerGenApi.h"
+#include "Spinnaker.h"
+#include "SpinGenApi/SpinnakerGenApi.h"
 #include <iostream>
 #include <sstream>
 #include <typeinfo>
@@ -35,13 +25,43 @@ using namespace Spinnaker::GenApi;
 using namespace Spinnaker::GenICam;
 using namespace std;
 
-// #define minExposureTime 20  // minimum exposuretime to test
-// #define maxExposureTime 100  // max exposuretime to test
-// #define stepSize 40  // step size between tested exposure times
 int numPerSettings;  // number of photos to take at each exposure time
 string DATA_BASE;
 string DATA_DIR;
 string RUN_NUM;
+
+/* Function to generate custom vector of exposure times to test the camera. Should be customly written by
+user aquiring data to suit their purposes. */
+vector<int> get_exposure_times() {
+    
+    //For rolling shutter:
+    //Set of exposure times: 25us to 5000us
+    /*
+    vector<int> exposureTimeList = {25, 50, 100, 200, 400, 600, 800};
+    for (int t_exp = 1000; t_exp < 5000; t_exp += 500) {
+        exposureTimeList.push_back(t_exp);
+    }
+    larger exposure times: 5ms onwards
+    vector<int> exposureTimeList = {};
+    for (int t_exp = 105000; t_exp <= 200000; t_exp += 5000) {
+        exposureTimeList.push_back(t_exp);
+    }*/
+
+
+    //For global reset: (min. exposure time is 350us)
+    //Set of exposure times: 700us to 5000us
+
+    vector<int> exposureTimeList = {700, 800};
+    for (int t_exp = 1000; t_exp < 5000; t_exp += 500) {
+        exposureTimeList.push_back(t_exp);
+    }
+    larger exposure times: 5ms onwards
+    for (int t_exp = 180000; t_exp <= 200000; t_exp += 5000) {
+        exposureTimeList.push_back(t_exp);
+    }
+
+    return exposureTimeList;
+}
 
 int loadConfiguration(string filename) {
     ifstream in(filename);
@@ -131,8 +151,10 @@ int DisableHeartbeat(INodeMap& nodeMap, INodeMap& nodeMapTLDevice)
 #endif
 
 /* Called by run camera function. Takes as input camera, camera nodeMap, and cameras
-nodeMapTLDevice. Acquires a single image and saves this image in the specified directory. Works under assumption that camera is in
-Acquisition mode. */
+nodeMapTLDevice. Also takes as input exposre time, adc bit depth, and the photo index
+for purposes of naming the file descriptavely. Acquires a single image and saves this
+image in the specified directory. Works under assumption that camera is in Acquisition
+mode. */
 int getImage(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, int exposureTime, int bitDepth, int numPhoto) {
     ImagePtr pResultImage = pCam->GetNextImage(1000);
     if (pResultImage->IsIncomplete()) {
@@ -157,7 +179,12 @@ int getImage(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice, int e
     }
 }
 
-/* Function called by main in case where only one camera connected. Can be modified to write custom script to run camera to acquire certain sets of images. Takes as input camera pointer, handled in main function. */
+/* Function called by main in case where only one camera connected. Can be modified
+to write custom script to run camera to acquire certain sets of images. Takes as input
+camera pointer. After collecting data, pushes data to Sanha's SLAC SDF space and removes
+it from local machine. NOTE: we've had problems with the camera crashing after taking too
+many images that are still unsolved. For this purpose, when running this script, we've commonly
+had to acquire the data we need in small chunks, resetting and rerunning the script regularely. */
 int runSingleCamera(CameraPtr pCam) {
     INodeMap& nodeMapTLDevice = pCam->GetTLDeviceNodeMap();
     PrintDeviceInfo(nodeMapTLDevice);
@@ -174,30 +201,7 @@ int runSingleCamera(CameraPtr pCam) {
         cout << endl << endl << "*** END OF DEBUG ***" << endl << endl;
 #endif
 
-    // For rolling shutter:
-    // Set of exposure times: 25us to 5000us
-    // vector<int> exposureTimeList = {25, 50, 100, 200, 400, 600, 800};
-    // vector<int> exposureTimeList = {};
-    // for (int t_exp = 1000; t_exp < 5000; t_exp += 500) {
-    //     exposureTimeList.push_back(t_exp);
-    // }
-    // larger exposure times: 5ms onwards
-    // vector<int> exposureTimeList = {};
-    // for (int t_exp = 105000; t_exp <= 200000; t_exp += 5000) {
-    //     exposureTimeList.push_back(t_exp);
-    // }
-    // For global reset: (min. exposure time is 350us)
-    // Set of exposure times: 700us to 5000us
-    // vector<int> exposureTimeList = {700, 800};
-    // vector<int> exposureTimeList = {};
-    // for (int t_exp = 1000; t_exp < 5000; t_exp += 500) {
-    //     exposureTimeList.push_back(t_exp);
-    // }
-    // larger exposure times: 5ms onwards
-    vector<int> exposureTimeList = {};
-    for (int t_exp = 180000; t_exp <= 200000; t_exp += 5000) {
-        exposureTimeList.push_back(t_exp);
-    }
+    vector<int> exposureTimeList = get_exposure_times()
 
     cout << "beginning data acquisition" << endl;
 
@@ -237,7 +241,7 @@ int runSingleCamera(CameraPtr pCam) {
     return 0;
 }
 
-/* Main function takes as input no arguments. Determines number of cameras and calls corresponding run
+/* Main function takes as input config file. calls loadConfiguration with the config file as an argument, then Determines number of cameras and calls corresponding run
 camera(s) function. */
 int main(int argc, char** argv) {
     if (argc < 2) {

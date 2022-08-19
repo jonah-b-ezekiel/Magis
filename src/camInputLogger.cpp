@@ -1,7 +1,9 @@
-/* File written by Jonah Ezekiel (jezekiel@stanford.edu). Program allows for software interfacing with
- * raspberry pi gpio pins for the purpose of logging gpio signals from camera.
- *		
- * See function comments for more details. */
+/* File written by Jonah Ezekiel (jezekiel@stanford.edu). Simple script to log whenever a
+specified GPIO input pin registers a change in the signal it is recieving. Used in camera trigger
+studies to read output from camera gpio and determine precisely when the camera begins and stops
+exposure. 
+	
+See function comments for more details. */
 
 #include "Spinnaker.h"
 #include "SpinGenApi/SpinnakerGenApi.h"
@@ -24,10 +26,10 @@ int main(int argc, char **argv) {
     cout << current << endl;
     while (true) {
 	int now = digitalRead(CAM_NUM);
-	if(now != current) {
-	    cout << now << endl;
-	    current = now;
-	}
+        if(now != current) {
+            cout << now << endl;
+            current = now;
+        }
     }
 }
 

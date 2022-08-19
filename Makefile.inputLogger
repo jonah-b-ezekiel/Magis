@@ -1,8 +1,5 @@
-# Simplified existing Makefile
-# Contact Sanha Cheong, sanha@stanford.edu for questions
-
 ################################################################################
-# Magis DIS Makefile
+# Makefile for camInputLogger.cpp
 ################################################################################
 PROJECT_ROOT=./
 

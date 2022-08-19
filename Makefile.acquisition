@@ -1,8 +1,5 @@
-# Simplified existing Makefile
-# Contact Sanha Cheong, sanha@stanford.edu for questions
-
 ################################################################################
-# Magis DIS Makefile
+# Makefile for acquisitionFunc.cpp
 ################################################################################
 PROJECT_ROOT=./
 

@@ -1,6 +1,9 @@
-/* File written by Jonah Ezekiel (jezekiel@stanford.edu), with many segments copied
+/* DO NOT USE FILE. THIS FILE IS STILL IN PRODUCTION
+
+
+File written by Jonah Ezekiel (jezekiel@stanford.edu), with many segments copied
 from parts of the spinnaker SDK examples. Program allows user to for testing of trigger
-delay betweentrigger and beginnig of acquisition for Spinnaker Blackfly Camera S model
+delay between trigger and beginnig of acquisition for Spinnaker Blackfly Camera S model
 cameras by use of the Spinnaker SDK API to software trigger the cameras and GPIO output
 from the cameras
 

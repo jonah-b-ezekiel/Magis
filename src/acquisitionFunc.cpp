@@ -2,34 +2,19 @@
 from parts of the spinnaker SDK examples. Program allows user to test out key
 functionality of working with the Spinnaker SDK API to interface with Flir
 Blackfly s cameras over software. In running takes no inputs, but generates a
-CLI in order to trigger the camera to take photos, and between photos optionally
+CLI in order to trigger the cameras, and between photos optionally
 modify the exposure time, adc bit depth, shutter mode, etc. Photo files stored in /magis/data/DIS/lab_images.
+Please make sure that this directory is created before running this file. For reference, the location of
+this file is /magis/MAGIS_DIS/src/acquisitionFunc.cpp
 
 Call order in case of one camera detected:
 
 main calls runSingleCamera
 	runSingleCamera calls PrintDeviceInfo
 	runSingleCamera calls setAcquisitionMode
-	runSingleCamera calls getImage, setExposureTime, or setShutterMode
+	runSingleCamera calls getImage, setExposureTime, or setShutterMode, etc. 
 		
 See function comments for more details. */
-
-//=============================================================================
-// Copyright (c) 2001-2019 FLIR Systems, Inc. All Rights Reserved.
-//
-// This software is the confidential and proprietary information of FLIR
-// Integrated Imaging Solutions, Inc. ("Confidential Information"). You
-// shall not disclose such Confidential Information and shall use it only in
-// accordance with the terms of the license agreement you entered into
-// with FLIR Integrated Imaging Solutions, Inc. (FLIR).
-//
-// FLIR MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
-// SOFTWARE, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-// PURPOSE, OR NON-INFRINGEMENT. FLIR SHALL NOT BE LIABLE FOR ANY DAMAGES
-// SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
-// THIS SOFTWARE OR ITS DERIVATIVES.
-//=============================================================================
 
 #include "Spinnaker.h"
 #include "SpinGenApi/SpinnakerGenApi.h"
@@ -114,8 +99,8 @@ int getImage(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice) {
     } else {
         //optionally convert image at this point to different format
         ostringstream filename;
-	time_t now = time(0);
-	filename << "/home/pi/magis/data/DIS/lab/";
+	    time_t now = time(0);
+	    filename << "/home/pi/magis/data/DIS/lab/";
         filename << "Acquisition-";
        	filename << ctime(&now);
         filename << ".raw";
@@ -127,9 +112,11 @@ int getImage(CameraPtr pCam, INodeMap& nodeMap, INodeMap& nodeMapTLDevice) {
     }
 }
 
-/* Function called by main in case where only one camera connected. Function calls PrintDeviceInfo
+/* Function called by main in case where only one camera connected. Function calls PrintDeviceInfo, setupGPIO,
 and setAcquisitionMode, setting up the camera and generates cli allowing user to take photos via
-function getImages, change exposure time via function setExposureTime, change adc bit depth via function setADCBitDepth, and change shutter mode via function setShutterMode */
+function getImages, change exposure time via function setExposureTime, change adc bit depth via function 
+setADCBitDepth, change shutter mode via function setShutterMode, and changes any other camera variable which has string options
+via function set */
 int runSingleCamera(CameraPtr pCam, SystemPtr system, CameraList camList) {
     INodeMap& nodeMapTLDevice = pCam->GetTLDeviceNodeMap();
     PrintDeviceInfo(nodeMapTLDevice);
